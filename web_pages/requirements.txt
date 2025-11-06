@@ -1,0 +1,4 @@
+mcp>=0.9.0
+playwright>=1.40.0
+trafilatura>=1.6.0
+
