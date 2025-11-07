@@ -18,3 +18,4 @@ async def close_browser():
         _browser = None
         _context = None
 
+

@@ -1,11 +1,11 @@
-from typing import Any
-from mcp.types import Tool, TextContent, Sequence
-from extract_main_text_tool import get_tool as get_extract_main_text_tool, execute as execute_extract_main_text
+from typing import Any, Sequence
+from mcp.types import Tool, TextContent
+from .run_python_code_tool import get_tool as get_run_python_code_tool, execute as execute_run_python_code
 
 _tools = {
-    "extract_main_text": {
-        "tool": get_extract_main_text_tool,
-        "execute": execute_extract_main_text
+    "run_python_code": {
+        "tool": get_run_python_code_tool,
+        "execute": execute_run_python_code
     }
 }
 

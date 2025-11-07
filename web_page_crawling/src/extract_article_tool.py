@@ -61,7 +61,7 @@ async def execute(arguments: dict[str, Any]) -> list[TextContent]:
             include_comments=include_comments,
             include_tables=include_tables,
             include_images=include_images,
-            output_format="text"
+            output_format="txt"
         )
         
         if not extracted:
@@ -97,4 +97,5 @@ async def execute(arguments: dict[str, Any]) -> list[TextContent]:
         )]
     finally:
         await page.close()
+
 

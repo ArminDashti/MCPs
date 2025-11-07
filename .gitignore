@@ -1,0 +1,5 @@
+chroma/src/__pycache__/server.cpython-312.pyc
+chroma/src/__pycache__/tools.cpython-312.pyc
+*.pyc
+text/src/__pycache__/summarize_text_tool.cpython-313.pyc
+*.pyc
