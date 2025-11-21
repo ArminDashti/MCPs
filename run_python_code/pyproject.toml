@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "run_python_code"
+version = "0.1.0"
+description = "MCP server that executes Python code in a conda environment"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=0.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[tool.setuptools]
+packages = ["run_python_code"]
+
+[tool.setuptools.package-data]
+run_python_code = ["src/**/*.py"]
+
+[project.scripts]
+run-python-code = "main:main"
+
