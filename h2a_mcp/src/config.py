@@ -1,0 +1,3 @@
+LOG_DIR = "logs"
+API_KEY = "your_api_key_here"
+MODEL = "your_model_name_here"
