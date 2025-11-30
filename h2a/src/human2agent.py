@@ -3,21 +3,21 @@ import json
 import requests
 import asyncio
 from typing import Any
-from pathlib import Path
 from mcp.types import Tool, TextContent
 from .logger import DailyLogger
-from .config import API_KEY, MODEL, LOG_DIR
 
-INSTRUCTION_DIR = Path(__file__).parent / "instruction"
+API_KEY = os.environ.get(
+    "OPENROUTER_API_KEY",
+    "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"
+)
+API_URL = 'https://openrouter.ai/api/v1/chat/completions'
+MODEL = 'kwaipilot/kat-coder-pro:free'
 
-
-def load_instruction(filename: str) -> str:
-    """Load instruction from a file in the instruction directory."""
-    instruction_path = INSTRUCTION_DIR / filename
-    if not instruction_path.exists():
-        raise FileNotFoundError(f"Instruction file not found: {instruction_path}")
-    with open(instruction_path, "r", encoding="utf-8") as f:
-        return f.read().strip()
+LOG_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+    "logs"
+)
+logger = DailyLogger(LOG_DIR)
 
 
 def get_tool() -> Tool:
@@ -49,7 +49,27 @@ async def execute(arguments: dict[str, Any]) -> list[TextContent]:
     formatted_prompt = f"The user ask me + {human_prompt} + please explain the user prompt."
 
     try:
-        instruction = load_instruction("prompt_engineering.txt")
+        instruction = (
+            """
+            - An LLM give you a human-written prompt to rewrite.
+            - You must transform and rewrite the human-written prompt into a clearer and
+              more effective version tailored for programming-related tasks for an LLM.
+            - It explicitly states that the focus is on software development and
+            - The rewritten prompt must provide thorough, precise, and expert-level explanations.
+            - The user might doesn't write the prompt in a good way, so you must rewrite it in a good way.
+            - For example, a user want to create a dropdown in a webapge.
+              The human-written prompt: "I want to create a list of items in a box when I click on a it."
+              The rewritten prompt: "Create a dropdown list of items."
+              You can see the example above to understand how to rewrite the prompt.
+              First user doesn't aware of dropdown but second user is aware of it.
+            - You must not explain what to do in the prompt. You must rewrite the prompt for an LLM to understand.
+              For example, no need to explain how to implement the dropdown in the prompt. You must rewrite the prompt for an LLM to understand.
+              Because most of time users don't provide a detailed explanation of the prompt.
+            - You must provide some rules for the LLM to follow.
+            - You must not provide codes in the prompt.
+            - You must always assume the user is a beginner at programming and they don't know how to write a good prompt.
+            """
+        )
 
         payload = {
             "model": MODEL,
