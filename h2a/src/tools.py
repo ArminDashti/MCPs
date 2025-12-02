@@ -1,6 +1,6 @@
 from typing import Any, Sequence
 from mcp.types import Tool, TextContent
-from .prompt_engineering_tool import (
+from .human2agent import (
     get_tool as get_prompt_engineering_tool,
     execute as execute_prompt_engineering_tool
 )

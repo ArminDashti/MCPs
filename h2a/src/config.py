@@ -4,10 +4,10 @@ import datetime
 # Configuration for the LLM application
 
 # API Token for Openrouter (or other LLM provider)
-TOKEN = "YOUR_API_TOKEN"  # Replace with your actual API token
+TOKEN = "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"  # Replace with your actual API token
 
 # Default LLM model to use
-MODEL = "gpt-3.5-turbo" # Example model, change as needed
+MODEL = "kwaipilot/kat-coder-pro:free" # Example model, change as needed
 
 # Function to generate dynamic log directory and file path
 def get_log_filepath():
