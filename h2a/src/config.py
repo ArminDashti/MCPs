@@ -13,7 +13,7 @@ MODEL = "kwaipilot/kat-coder-pro:free" # Example model, change as needed
 def get_log_filepath():
     user_folder = os.path.expanduser("~") # Gets the user's home directory
     log_base_dir = os.path.join(user_folder, "h2o")
-    
+        
     current_date = datetime.datetime.now().strftime("%y-%m-%d")
     current_time = datetime.datetime.now().strftime("%H%M")
     

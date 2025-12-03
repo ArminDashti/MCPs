@@ -71,7 +71,7 @@ When rewriting, follow this pattern:
 
 ## Quality Checklist
 
-Before finalizing a rewritten prompt, verify:
+Before finalizing a rewritten prompt, verify: (The below options are only for you for cheking)
 - ✓ Is it clear what needs to be built?
 - ✓ Does it use proper technical terminology?
 - ✓ Is it concise without being vague?
