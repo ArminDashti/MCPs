@@ -1,0 +1,13 @@
+{
+  "api": {
+    "token": "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",
+    "model": "kwaipilot/kat-coder-pro:free"
+  },
+  "logging": {
+    "base_directory": "h2o",
+    "date_format": "%y-%m-%d",
+    "time_format": "%H%M",
+    "file_extension": ".txt",
+    "entry_format": "Model: {model_name}\n\nUser prompt:\n{user_prompt}\n\nLLM response: (from Openrouter)\n{llm_response}\n\n=================================="
+  }
+}
