@@ -1,10 +1,10 @@
 {
   "api": {
-    "token": "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",
-    "model": "kwaipilot/kat-coder-pro:free"
+    "token": "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",
+    "model": "openai/gpt-5.2-chat"
   },
   "logging": {
-    "base_directory": "h2o",
+    "directory": "C:/h2o",
     "date_format": "%y-%m-%d",
     "time_format": "%H%M",
     "file_extension": ".txt",

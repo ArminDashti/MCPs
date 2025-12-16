@@ -17,6 +17,11 @@ def list_tools() -> Sequence[Tool]:
     return [tool_info["tool"]() for tool_info in _tools.values()]
 
 
+def tool_exists(name: str) -> bool:
+    """Check if a tool with the given name exists."""
+    return name in _tools
+
+
 async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
     if name in _tools:
         return await _tools[name]["execute"](arguments)

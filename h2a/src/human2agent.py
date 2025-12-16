@@ -2,17 +2,18 @@ import os
 import json
 import requests
 import asyncio
+import time
 from typing import Any
 from pathlib import Path
 from mcp.types import Tool, TextContent
-from .config import MODEL, get_log_filepath
+from .config import MODEL, get_log_directory
 from .config import TOKEN as API_KEY
 from .logger import DailyLogger
 
 API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 
-LOG_DIR = get_log_filepath()
+LOG_DIR = get_log_directory()
 logger = DailyLogger(LOG_DIR)
 
 def load_instruction() -> str:
@@ -22,10 +23,10 @@ def load_instruction() -> str:
         with open(instruction_path, 'r', encoding='utf-8') as f:
             return f.read().strip()
     except FileNotFoundError:
-        logger.log_prompt("", error=f"Instruction file not found: {instruction_path}")
+        logger.log_prompt("", error=f"Instruction file not found: {instruction_path}", model=MODEL)
         raise
     except Exception as e:
-        logger.log_prompt("", error=f"Error loading instruction: {str(e)}")
+        logger.log_prompt("", error=f"Error loading instruction: {str(e)}", model=MODEL)
         raise
 
 def get_tool() -> Tool:
@@ -48,7 +49,7 @@ def get_tool() -> Tool:
 async def execute(arguments: dict[str, Any]) -> list[TextContent]:
     human_prompt = arguments.get("human_prompt")
     if not human_prompt:
-        logger.log_prompt("", error="human_prompt is required")
+        logger.log_prompt("", error="human_prompt is required", model=MODEL)
         return [TextContent(
             type="text",
             text=json.dumps({"error": "human_prompt is required"}, indent=2)
@@ -72,11 +73,14 @@ async def execute(arguments: dict[str, Any]) -> list[TextContent]:
             'Content-Type': 'application/json'
         }
 
+        # Measure response time
+        start_time = time.time()
         loop = asyncio.get_event_loop()
         response = await loop.run_in_executor(
             None,
             lambda: requests.post(API_URL, headers=headers, json=payload)
         )
+        response_time = time.time() - start_time
 
         if response.status_code == 200:
             response_data = response.json()
@@ -86,7 +90,13 @@ async def execute(arguments: dict[str, Any]) -> list[TextContent]:
                 "rewritten_prompt": rewritten_prompt,
                 "success": True
             }
-            logger.log_prompt(human_prompt, rewritten_prompt)
+            # Log with model and response time
+            logger.log_prompt(
+                prompt=formatted_prompt,
+                response=rewritten_prompt,
+                model=MODEL,
+                response_time=response_time
+            )
         else:
             error_msg = f"API request failed with status code {response.status_code}"
             result = {
@@ -94,7 +104,12 @@ async def execute(arguments: dict[str, Any]) -> list[TextContent]:
                 "details": response.text,
                 "success": False
             }
-            logger.log_prompt(human_prompt, error=error_msg)
+            logger.log_prompt(
+                prompt=formatted_prompt,
+                error=error_msg,
+                model=MODEL,
+                response_time=response_time
+            )
 
         return [TextContent(
             type="text",
@@ -107,7 +122,11 @@ async def execute(arguments: dict[str, Any]) -> list[TextContent]:
             "error": error_msg,
             "success": False
         }
-        logger.log_prompt(human_prompt, error=error_msg)
+        logger.log_prompt(
+            prompt=formatted_prompt if 'formatted_prompt' in locals() else human_prompt,
+            error=error_msg,
+            model=MODEL
+        )
         return [TextContent(
             type="text",
             text=json.dumps(result, indent=2, ensure_ascii=False)
