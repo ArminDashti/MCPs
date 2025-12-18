@@ -35,7 +35,7 @@ class DailyLogger:
         
         log_file = self._get_log_file_path()
         now = datetime.now()
-        date_str = now.strftime("%Y-%m-%d")
+        date_str = now.strftime("%y-%m-%d")
         time_str = now.strftime("%H:%M:%S")
         
         # Format response time if provided
@@ -66,4 +66,57 @@ class DailyLogger:
                 f.write(log_entry)
         except Exception as e:
             print(f"Warning: Failed to log prompt: {e}")
+
+    def log_unified(self,
+                    original_prompt: str,
+                    refined_prompt: Optional[str] = None,
+                    planning: Optional[str] = None,
+                    model: Optional[str] = None,
+                    response_time: Optional[float] = None) -> None:
+        """
+        Log unified entry with Original Prompt, Refined Prompt, and Planning.
+        If log_dir is None, logging is disabled (no-op).
+        """
+        # Skip logging if no directory is configured
+        if not self.log_dir:
+            return
+        
+        log_file = self._get_log_file_path()
+        now = datetime.now()
+        date_str = now.strftime("%y-%m-%d")
+        time_str = now.strftime("%H:%M:%S")
+        
+        # Format response time if provided
+        response_time_str = f"{response_time:.3f}s" if response_time is not None else "N/A"
+        
+        # Format model if provided
+        model_str = model if model else "N/A"
+        
+        # Build unified log entry
+        log_entry = f"Date: {date_str}\n"
+        log_entry += f"Time: {time_str}\n"
+        log_entry += f"Model: {model_str}\n"
+        log_entry += f"Response time: {response_time_str}\n\n"
+        log_entry += f"Original Prompt:\n{original_prompt}\n"
+        log_entry += "=" * 74 + "\n\n"
+        
+        if refined_prompt:
+            log_entry += f"Refined Prompt:\n{refined_prompt}\n"
+        else:
+            log_entry += "Refined Prompt:\n[N/A]\n"
+        log_entry += "=" * 74 + "\n\n"
+        
+        if planning:
+            log_entry += f"Planning:\n{planning}\n"
+        else:
+            log_entry += "Planning:\n[N/A]\n"
+        
+        log_entry += "\n" + "=" * 80 + "\n\n"
+
+        try:
+            # Append to log file (not overwrite)
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(log_entry)
+        except Exception as e:
+            print(f"Warning: Failed to log unified entry: {e}")
 

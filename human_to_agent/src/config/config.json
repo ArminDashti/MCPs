@@ -1,7 +1,7 @@
 {
   "api": {
-    "token": "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",
-    "model": "openai/gpt-5.2-chat"
+    "token": "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",
+    "model": "google/gemini-3-flash-preview"
   },
   "logging": {
     "directory": "C:/h2o",

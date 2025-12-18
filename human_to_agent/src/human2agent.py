@@ -3,7 +3,7 @@ import json
 import requests
 import asyncio
 import time
-from typing import Any
+from typing import Any, Optional
 from pathlib import Path
 from mcp.types import Tool, TextContent
 from .config import MODEL, get_log_directory
@@ -28,6 +28,59 @@ def load_instruction() -> str:
     except Exception as e:
         logger.log_prompt("", error=f"Error loading instruction: {str(e)}", model=MODEL)
         raise
+
+def load_planning_instruction() -> str:
+    """Load planning instruction from the planning.md file."""
+    instruction_path = Path(__file__).parent / "instruction" / "planning.md"
+    try:
+        with open(instruction_path, 'r', encoding='utf-8') as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        logger.log_prompt("", error=f"Planning instruction file not found: {instruction_path}", model=MODEL)
+        raise
+    except Exception as e:
+        logger.log_prompt("", error=f"Error loading planning instruction: {str(e)}", model=MODEL)
+        raise
+
+async def create_plan(refined_prompt: str) -> tuple[Optional[str], float]:
+    """Create a step-by-step plan from the refined prompt.
+    Returns tuple of (plan, response_time).
+    """
+    try:
+        planning_instruction = load_planning_instruction()
+        formatted_prompt = f"Create a detailed step-by-step plan for the following refined prompt:\n\n{refined_prompt}\n\nFollow the planning structure and guidelines provided in the instructions."
+
+        payload = {
+            "model": MODEL,
+            "messages": [
+                {"role": "system", "content": planning_instruction},
+                {"role": "user", "content": formatted_prompt}
+            ]
+        }
+
+        headers = {
+            'Authorization': f'Bearer {API_KEY}',
+            'Content-Type': 'application/json'
+        }
+
+        start_time = time.time()
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: requests.post(API_URL, headers=headers, json=payload)
+        )
+        response_time = time.time() - start_time
+
+        if response.status_code == 200:
+            response_data = response.json()
+            plan = response_data['choices'][0]['message']['content']
+            return plan, response_time
+        else:
+            error_msg = f"Planning API request failed with status code {response.status_code}"
+            return None, response_time
+    except Exception as e:
+        error_msg = str(e)
+        return None, 0.0
 
 def get_tool() -> Tool:
     return Tool(
@@ -73,30 +126,40 @@ async def execute(arguments: dict[str, Any]) -> list[TextContent]:
             'Content-Type': 'application/json'
         }
 
-        # Measure response time
+        # Measure response time for prompt refinement
         start_time = time.time()
         loop = asyncio.get_event_loop()
         response = await loop.run_in_executor(
             None,
             lambda: requests.post(API_URL, headers=headers, json=payload)
         )
-        response_time = time.time() - start_time
+        refinement_time = time.time() - start_time
 
         if response.status_code == 200:
             response_data = response.json()
             rewritten_prompt = response_data['choices'][0]['message']['content']
+            
+            # After refining the prompt, automatically create a plan
+            plan, planning_time = await create_plan(rewritten_prompt)
+            
+            # Calculate total response time (refinement + planning)
+            total_response_time = refinement_time + planning_time
+            
+            # Log unified entry with all information
+            logger.log_unified(
+                original_prompt=human_prompt,
+                refined_prompt=rewritten_prompt,
+                planning=plan if plan else None,
+                model=MODEL,
+                response_time=total_response_time
+            )
+            
             result = {
                 "original_prompt": human_prompt,
                 "rewritten_prompt": rewritten_prompt,
+                "plan": plan if plan else None,
                 "success": True
             }
-            # Log with model and response time
-            logger.log_prompt(
-                prompt=formatted_prompt,
-                response=rewritten_prompt,
-                model=MODEL,
-                response_time=response_time
-            )
         else:
             error_msg = f"API request failed with status code {response.status_code}"
             result = {
@@ -108,7 +171,7 @@ async def execute(arguments: dict[str, Any]) -> list[TextContent]:
                 prompt=formatted_prompt,
                 error=error_msg,
                 model=MODEL,
-                response_time=response_time
+                response_time=refinement_time
             )
 
         return [TextContent(
