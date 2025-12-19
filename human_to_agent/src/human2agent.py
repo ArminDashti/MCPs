@@ -7,7 +7,7 @@ from typing import Any, Optional
 from pathlib import Path
 from mcp.types import Tool, TextContent
 from .config import MODEL, get_log_directory
-from .config import TOKEN as API_KEY
+from .config import TOKEN as API_KEY, PLANNING_TOKEN
 from .logger import DailyLogger
 
 API_URL = 'https://openrouter.ai/api/v1/chat/completions'
@@ -59,7 +59,7 @@ async def create_plan(refined_prompt: str) -> tuple[Optional[str], float]:
         }
 
         headers = {
-            'Authorization': f'Bearer {API_KEY}',
+            'Authorization': f'Bearer {PLANNING_TOKEN}',
             'Content-Type': 'application/json'
         }
 

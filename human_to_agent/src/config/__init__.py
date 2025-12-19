@@ -3,6 +3,10 @@ import os
 import json
 import datetime
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Load configuration from config.json
 _config_path = Path(__file__).parent / "config.json"
@@ -15,7 +19,12 @@ except Exception as e:
     raise ValueError(f"Error loading config.json: {e}")
 
 # API Token for Openrouter (or other LLM provider)
-TOKEN = _config["api"]["token"]
+# Priority: environment variable > config.json
+TOKEN = os.getenv("openrouter_api_key") or _config["api"]["token"]
+
+# Planning API Token for Openrouter (separate key for planning operations)
+# Priority: environment variable > regular TOKEN > config.json
+PLANNING_TOKEN = os.getenv("openrouter_api_key_planing") or TOKEN
 
 # Default LLM model to use
 MODEL = _config["api"]["model"]
@@ -66,6 +75,7 @@ LOG_ENTRY_FORMAT = _config["logging"].get("entry_format", "Model: {model_name}\n
 
 __all__ = [
     'TOKEN',
+    'PLANNING_TOKEN',
     'MODEL',
     'get_log_directory',
     'get_log_filepath',
