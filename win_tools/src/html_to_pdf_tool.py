@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Any
 from mcp.types import Tool, TextContent
-from .browser_utils import init_browser
+from browser_utils import init_browser
 
 def get_tool() -> Tool:
     return Tool(

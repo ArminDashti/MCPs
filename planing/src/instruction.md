@@ -54,4 +54,3 @@ Your plan must follow this exact structure:
 - Consider dependencies between steps
 - Include validation points throughout the plan
 - Adapt the level of detail based on the complexity of the task
-

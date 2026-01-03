@@ -4,10 +4,10 @@ from typing import Any
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Resource, Tool, TextContent, Sequence
-from tools import list_tools, call_tool
+from tools import list_tools, call_tool, tool_exists
 from browser_utils import close_browser
 
-app = Server("html-to-pdf-converter")
+app = Server("windows-tools")
 
 @app.list_resources()
 async def list_resources() -> list[Resource]:
@@ -23,6 +23,9 @@ async def list_tools_handler() -> Sequence[Tool]:
 
 @app.call_tool()
 async def call_tool_handler(name: str, arguments: dict[str, Any]) -> list[TextContent]:
+    # Check if tool exists before calling to ensure proper error handling
+    if not tool_exists(name):
+        raise ValueError(f"Unknown tool: {name}")
     return await call_tool(name, arguments)
 
 async def main():
