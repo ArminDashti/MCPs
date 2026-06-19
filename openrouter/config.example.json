@@ -1,0 +1,5 @@
+{
+  "modelsFile": "models.json",
+  "defaultModel": "gemini-flash",
+  "logsDir": "C:/logs/openrouter"
+}

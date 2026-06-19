@@ -1,0 +1,4 @@
+{
+  "claude": "anthropic/claude-sonnet-4",
+  "gemini-flash": "google/gemini-2.5-flash-preview"
+}
